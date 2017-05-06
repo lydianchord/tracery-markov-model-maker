@@ -34,19 +34,13 @@ def symbol(tokens):
     return '#{}#'.format(''.join(chain.from_iterable(zip(tokens, spaces))))
 
 
-def unigram(token):
-    if token in PUNCTUATION:
-        token = PUNCTUATION[token]
-    return token
-
-
 def literal(tokens, convert_punc=False):
     spaces = get_spaces(tokens)
+    joined = ''.join(chain.from_iterable(zip(tokens, spaces)))
     if convert_punc:
-        literal_tokens = (unigram(x) for x in tokens)
-    else:
-        literal_tokens = tokens
-    return ''.join(chain.from_iterable(zip(literal_tokens, spaces)))
+        for k, v in PUNCTUATION.items():
+            joined = joined.replace(k, v)
+    return joined
 
 
 def ngram(tokens):
@@ -54,7 +48,7 @@ def ngram(tokens):
         space = ''
     else:
         space = ' '
-    return '{}{}{}'.format(unigram(tokens[0]), space, symbol(tokens[1:]))
+    return '{}{}{}'.format(literal(tokens[:1], True), space, symbol(tokens[1:]))
 
 
 def gcd_of_seq(numbers):
