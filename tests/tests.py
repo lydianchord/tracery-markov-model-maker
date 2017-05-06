@@ -36,10 +36,10 @@ class TraceryMarkovModelTests(unittest.TestCase):
             'origin of',
         )
         model = self.get_tracery_model(2, True)
-        self.assertNotIn('#origin#', model['start_boundary'])
+        self.assertIn('#WORD_ORIGIN#', model['start_boundary'])
         self.assertNotIn('origin #of#', model['origin'])
-        self.assertNotIn('the #origin#', model['the'])
-        self.assertNotIn('WORD_ORIGIN #of#', model['WORD_ORIGIN'])
+        self.assertIn('the #WORD_ORIGIN#', model['the'])
+        self.assertIn('origin #of#', model['WORD_ORIGIN'])
     
     def test_no_spaces_before_punctuation(self):
         self.write_test_corpus(
@@ -47,17 +47,14 @@ class TraceryMarkovModelTests(unittest.TestCase):
             'They said some stuff?!',
         )
         model = self.get_tracery_model(2)
-        self.assertNotIn('stuff ' + self.PUNC_SUBS['.'], model['stuff'])
-        self.assertNotIn('stuff ' + self.PUNC_SUBS['?'], model['stuff'])
+        self.assertIn('stuff#{}"#'.format(self.PUNC_SUBS['.']), model['stuff'])
+        self.assertIn('stuff#{}#'.format(self.PUNC_SUBS['?']), model['stuff'])
     
     def test_punctuation_substitutes_converted_back(self):
-        self.write_test_corpus('Title: Subtitle!')
+        self.write_test_corpus('Title: "Subtitle!"')
         model = self.get_tracery_model(2)
-        self.assertNotIn(
-            self.PUNC_SUBS[':'] + ' #Subtitle#',
-            model[self.PUNC_SUBS[':']]
-        )
-        self.assertNotIn(self.PUNC_SUBS['!'], model[self.PUNC_SUBS['!']])
+        self.assertIn(': #"Subtitle#', model[self.PUNC_SUBS[':']])
+        self.assertIn('!"', model[self.PUNC_SUBS['!'] + '"'])
 
 
 if __name__ == '__main__':
