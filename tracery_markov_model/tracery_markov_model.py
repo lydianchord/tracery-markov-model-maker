@@ -11,21 +11,21 @@ except ImportError:
     from fractions import gcd
 
 PUNCTUATION = {
-    '0PUNC_ELL': '...',
+    '0PUNC_EL': '...',
     'PUNC_PER': '.',
-    'PUNC_QM': '?',
-    'PUNC_EP': '!',
+    'PUNC_QMK': '?',
+    'PUNC_EPT': '!',
     'PUNC_COM': ',',
     'PUNC_COL': ':',
     'PUNC_SEM': ';',
 }
 
-ENDINGS = {'PUNC_PER', 'PUNC_QM', 'PUNC_EP'}
+ENDINGS = {'PUNC_PER', 'PUNC_QMK', 'PUNC_EPT'}
 
 
 def get_spaces(tokens):
     num_tokens = len(tokens)
-    return ('' if i + 1 == num_tokens or tokens[i+1] in PUNCTUATION else ' '
+    return ('' if i + 1 == num_tokens or tokens[i+1][:8] in PUNCTUATION else ' '
             for i in range(num_tokens))
 
 
@@ -44,7 +44,7 @@ def literal(tokens, convert_punc=False):
 
 
 def ngram(tokens):
-    if tokens[1] in PUNCTUATION:
+    if tokens[1][:8] in PUNCTUATION:
         space = ''
     else:
         space = ' '
