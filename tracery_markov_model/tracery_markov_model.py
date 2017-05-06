@@ -23,35 +23,42 @@ PUNCTUATION = {
 ENDINGS = {'PUNC_PER', 'PUNC_QMK', 'PUNC_EPT'}
 
 
-def get_spaces(tokens):
+def _get_spaces(tokens):
     num_tokens = len(tokens)
     return ('' if i + 1 == num_tokens or tokens[i+1][:8] in PUNCTUATION else ' '
             for i in range(num_tokens))
 
 
-def symbol(tokens):
-    spaces = get_spaces(tokens)
+def _substitute_word_origin(tokens):
+    return (x if x != 'origin' else 'WORD_ORIGIN' for x in tokens)
+
+
+def _symbol(tokens):
+    spaces = _get_spaces(tokens)
+    tokens = _substitute_word_origin(tokens)
     return '#{}#'.format(''.join(chain.from_iterable(zip(tokens, spaces))))
 
 
-def literal(tokens, convert_punc=False):
-    spaces = get_spaces(tokens)
+def _literal(tokens, convert_substitutes=False):
+    spaces = _get_spaces(tokens)
+    if not convert_substitutes:
+        tokens = _substitute_word_origin(tokens)
     joined = ''.join(chain.from_iterable(zip(tokens, spaces)))
-    if convert_punc:
+    if convert_substitutes:
         for k, v in PUNCTUATION.items():
             joined = joined.replace(k, v)
     return joined
 
 
-def ngram(tokens):
+def _ngram(tokens):
     if tokens[1][:8] in PUNCTUATION:
         space = ''
     else:
         space = ' '
-    return '{}{}{}'.format(literal(tokens[:1], True), space, symbol(tokens[1:]))
+    return '{}{}{}'.format(_literal(tokens[:1], True), space, _symbol(tokens[1:]))
 
 
-def gcd_of_seq(numbers):
+def _gcd_of_seq(numbers):
     if len(numbers) == 1:
         return next(iter(numbers))
     return reduce(lambda x, y: gcd(x, y), numbers)
@@ -59,7 +66,7 @@ def gcd_of_seq(numbers):
 
 def corpus_to_tracery_json(corpus_path, ngram_size=3, all_lowercase=False):
     tracery_dict = defaultdict(list)
-    tracery_dict['origin'].append(symbol(['start_boundary']))
+    tracery_dict['origin'].append(_symbol(['start_boundary']))
     
     with open(corpus_path) as f:
         lines = f.readlines()
@@ -74,17 +81,17 @@ def corpus_to_tracery_json(corpus_path, ngram_size=3, all_lowercase=False):
         for i in range(limit):
             rule_tokens = line[i:i+ngram_size-1]
             if i == 0 or line[i-1] in ENDINGS and line[i] not in PUNCTUATION:
-                tracery_dict['start_boundary'].append(symbol(rule_tokens))
-            tracery_dict[literal(rule_tokens)].append(ngram(line[i:i+ngram_size]))
+                tracery_dict['start_boundary'].append(_symbol(rule_tokens))
+            tracery_dict[_literal(rule_tokens)].append(_ngram(line[i:i+ngram_size]))
         rule_tokens = line[-ngram_size+1:]
-        tracery_dict[literal(rule_tokens)].append(literal(rule_tokens, True))
+        tracery_dict[_literal(rule_tokens)].append(_literal(rule_tokens, True))
     
     for rule, options in tracery_dict.items():
         if len(options) > 1:
             counts = defaultdict(int)
             for option in options:
                 counts[option] += 1
-            counts_gcd = gcd_of_seq(counts.values())
+            counts_gcd = _gcd_of_seq(counts.values())
             new_options = []
             for option in counts:
                 new_options.extend([option] * int(counts[option] / counts_gcd))
