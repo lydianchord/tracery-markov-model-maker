@@ -5,4 +5,4 @@ Optional arguments:
 *  `-n SIZE`, `--ngram SIZE` &mdash; Specify n-gram size (default: 3)
 * `-l`, `--lowercase` &mdash; Convert all input to lowercase
 
-The input corpus should be a text file containing statements separated by line breaks (preferably in English since it's the only language I've tested so far).
+The input corpus should be a text file containing statements separated by line breaks (preferably in English since it's the only language I've tested so far). The output JSON file will appear in a folder named `output`.

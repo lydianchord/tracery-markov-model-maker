@@ -113,4 +113,6 @@ if __name__ == '__main__':
     parser.add_argument('-l', '--lowercase', action='store_true',
                         help='convert all input to lowercase')
     args = parser.parse_args()
+    if args.ngram < 2:
+        parser.error('Size of n-gram must be at least 2')
     corpus_to_tracery_json(args.corpus, args.ngram, args.lowercase)
