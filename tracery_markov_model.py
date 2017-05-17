@@ -69,22 +69,21 @@ def corpus_to_tracery_json(corpus_path, ngram_size=3, all_lowercase=False):
     tracery_dict['origin'].append(_symbol(['start_boundary']))
     
     with open(corpus_path) as f:
-        lines = f.readlines()
-    for line in lines:
-        line = line.strip()
-        if all_lowercase:
-            line = line.lower()
-        for k, v in sorted(PUNCTUATION.items()):
-            line = line.replace(v, ' ' + k)
-        line = line.split()
-        limit = len(line) - ngram_size + 1
-        for i in range(limit):
-            rule_tokens = line[i:i+ngram_size-1]
-            if i == 0 or line[i-1] in ENDINGS and line[i] not in PUNCTUATION:
-                tracery_dict['start_boundary'].append(_symbol(rule_tokens))
-            tracery_dict[_literal(rule_tokens)].append(_ngram(line[i:i+ngram_size]))
-        rule_tokens = line[-ngram_size+1:]
-        tracery_dict[_literal(rule_tokens)].append(_literal(rule_tokens, True))
+        for line in f:
+            line = line.strip()
+            if all_lowercase:
+                line = line.lower()
+            for k, v in sorted(PUNCTUATION.items()):
+                line = line.replace(v, ' ' + k)
+            line = line.split()
+            limit = len(line) - ngram_size + 1
+            for i in range(limit):
+                rule_tokens = line[i:i+ngram_size-1]
+                if i == 0 or line[i-1] in ENDINGS and line[i] not in PUNCTUATION:
+                    tracery_dict['start_boundary'].append(_symbol(rule_tokens))
+                tracery_dict[_literal(rule_tokens)].append(_ngram(line[i:i+ngram_size]))
+            rule_tokens = line[-ngram_size+1:]
+            tracery_dict[_literal(rule_tokens)].append(_literal(rule_tokens, True))
     
     for rule, options in tracery_dict.items():
         if len(options) > 1:
