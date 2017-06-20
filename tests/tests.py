@@ -1,10 +1,8 @@
 import json
 import os
 import shutil
-import sys
 import unittest
 
-sys.path.append('..')
 import tracery_markov_model
 
 
